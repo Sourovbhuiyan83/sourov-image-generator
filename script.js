@@ -26,7 +26,7 @@ async function generateImage() {
   `;
 
   try {
-    const res = await fetch("http://localhost:3000/generate", {
+    const res = await fetch("https://sourov-image-generator.onrender.com/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt, size, style })
