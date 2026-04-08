@@ -91,13 +91,16 @@ function showThumb(src, prompt) {
   document.getElementById("prompt").value = prompt;
 }
 
-function downloadImage() {
+async function downloadImage() {
   if (!currentSrc) return;
+  const response = await fetch(currentSrc);
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = currentSrc;
+  a.href = url;
   a.download = "sourov-generated.png";
-  a.target = "_blank";
   a.click();
+  URL.revokeObjectURL(url);
 }
 
 function copyPrompt() {
