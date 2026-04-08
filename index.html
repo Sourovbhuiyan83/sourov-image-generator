@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sourov AI Image Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .header .badge {
+      display: inline-block;
+      background: #1a1a2e;
+      border: 1px solid #4f46e5;
+      color: #818cf8;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      padding: 4px 14px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header p {
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 660px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 96px;
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      color: #f0f0f0;
+      font-size: 14px;
+      font-family: inherit;
+      padding: 12px 14px;
+      resize: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #4f46e5;
+    }
+
+    textarea::placeholder { color: #3f3f3f; }
+
+    .options-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    select {
+      width: 100%;
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      color: #f0f0f0;
+      font-size: 13px;
+      font-family: inherit;
+      padding: 10px 12px;
+    }
+
+    select:focus { outline: none; border-color: #4f46e5; }
+
+    .btn-generate {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-generate:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-generate:active { transform: scale(0.98); }
+    .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .result-box {
+      width: 100%;
+      min-height: 340px;
+      background: #111;
+      border: 1px dashed #2a2a2a;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .result-box img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+    }
+
+    .placeholder {
+      text-align: center;
+      color: #3f3f3f;
+    }
+
+    .placeholder .icon { font-size: 40px; margin-bottom: 10px; }
+    .placeholder p { font-size: 13px; }
+
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid #2a2a2a;
+      border-top-color: #818cf8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text { font-size: 13px; color: #6b7280; text-align: center; }
+
+    .actions {
+      display: none;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 9px;
+      font-size: 13px;
+      font-family: inherit;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      background: transparent;
+      color: #9ca3af;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-action:hover { background: #222; color: #f0f0f0; }
+
+    .error-msg {
+      display: none;
+      font-size: 13px;
+      color: #f87171;
+      margin-top: 10px;
+    }
+
+    .history-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .thumb {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #2a2a2a;
+      opacity: 0.7;
+      transition: opacity 0.15s, border-color 0.15s;
+    }
+
+    .thumb:hover { opacity: 1; border-color: #4f46e5; }
+
+    #historyCard { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="badge">AI Powered</div>
+    <h1>Sourov Image Generator</h1>
+    <p>Describe anything — AI will bring it to life instantly.</p>
+  </div>
+
+  <div class="card">
+    <label>Prompt</label>
+    <textarea id="prompt" placeholder="e.g. A futuristic city at sunset, cyberpunk style, ultra-detailed..."></textarea>
+
+    <div class="options-row">
+      <div>
+        <label>Size</label>
+        <select id="size">
+          <option value="1024x1024">Square (1024×1024)</option>
+          <option value="1792x1024">Landscape (1792×1024)</option>
+          <option value="1024x1792">Portrait (1024×1792)</option>
+        </select>
+      </div>
+      <div>
+        <label>Style</label>
+        <select id="style">
+          <option value="vivid">Vivid</option>
+          <option value="natural">Natural</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-generate" id="genBtn" onclick="generateImage()">✦ Generate Image</button>
+    <p class="error-msg" id="errMsg">Something went wrong. Please check your server and try again.</p>
+  </div>
+
+  <div class="card">
+    <label>Result</label>
+    <div class="result-box" id="resultBox">
+      <div class="placeholder">
+        <div class="icon">🖼️</div>
+        <p>Your image will appear here</p>
+      </div>
+    </div>
+    <div class="actions" id="actionRow">
+      <button class="btn-action" onclick="downloadImage()">⬇ Download</button>
+      <button class="btn-action" onclick="copyPrompt()">⎘ Copy Prompt</button>
+    </div>
+  </div>
+
+  <div class="card" id="historyCard">
+    <label>Recent Generations</label>
+    <div class="history-row" id="historyRow"></div>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
