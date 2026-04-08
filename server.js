@@ -5,8 +5,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const HF_TOKEN = "const HF_TOKEN = process.env.HF_TOKEN;";
-const MODEL = "black-forest-labs/FLUX.1-schnell";
+const HF_TOKEN = "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";
+const MODEL = "stabilityai/stable-diffusion-xl-base-1.0";
 
 app.post("/generate", async (req, res) => {
   try {
